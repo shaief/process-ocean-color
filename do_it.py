@@ -15,10 +15,10 @@ target_directory = os.path.join(HOME_DIRECTORY,BASE_DIRECTORY, target_directory,
 CONVERT_TO_NetCDF4 = True
 start_date = date(2016, 5, 1)
 end_date = date(2016, 5, 31)
-number_of_days = (end_date - start_date).days
-
 lon = (30, 36)
 lat = (30, 38)
+
+number_of_days = (end_date - start_date).days
 west, east = lon
 south, north = lat
 
@@ -34,7 +34,7 @@ arguments = {
                    'east': east,
                    'north': north,
                    'days_in_year': days_in_year,
-                   'year': start_date[0]},
+                   'year': start_date.year},
     'batchl3mapgen': {'directory': target_directory,
                     'west': west,
                     'south': south,
