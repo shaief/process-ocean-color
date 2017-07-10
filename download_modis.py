@@ -10,8 +10,8 @@ def download_files(start_date, number_of_days, lon, lat, target_directory):
     start_datetime = datetime.combine(start_date, time.min)
     first_day = int(start_datetime.timestamp() / 86400)  # days since epoch
 
-    BASE_URL = 'http://oceancolor.gsfc.nasa.gov/cgi/browse.pl'
-    GET_FILE_URL = 'http://oceandata.sci.gsfc.nasa.gov/cgi/getfile/'
+    BASE_URL = 'https://oceancolor.gsfc.nasa.gov/cgi/browse.pl'
+    GET_FILE_URL = 'https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/'
     url = BASE_URL + '?sub=level1or2list&sen=am&per=DAY&dnm=D&day={}&n={}&s={}&w={}&e={}'
 
     for d in range(first_day, first_day + number_of_days):
