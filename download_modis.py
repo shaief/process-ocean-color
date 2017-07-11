@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 import os
+import pathlib
 from datetime import datetime, date, time
 import re
 
 import requests
 
 def download_files(start_date, number_of_days, lon, lat, target_directory):
+    print('Downloading files...')
     target = '%s{}' % target_directory
+    pathlib.Path(target_directory).mkdir(parents=True, exist_ok=True)
     start_datetime = datetime.combine(start_date, time.min)
     first_day = int(start_datetime.timestamp() / 86400)  # days since epoch
 
@@ -37,7 +40,7 @@ def download_files(start_date, number_of_days, lon, lat, target_directory):
                                 print('downloaded file {}'.format(line))
                             except Exception as e:
                                 print('Failed to download file due to: {}'.format(e))
-
+    print('Done downloading files...')
 
 if __name__ == '__main__':
     start_date = date(2016, 5, 1)
