@@ -2,7 +2,7 @@ batchl2bin = '''#!/bin/sh
 # to run it: ./batchl2bin.bsh
 # first define the region to be extracted from your MODIS L1A files
 # NOTE! change these for your own region of interest
-export OCSSWROOT=/home/shaief/ocssw
+export OCSSWROOT={SEADAS_PATH}
 source $OCSSWROOT/OCSSW_bash.env
 cd {directory}
 
@@ -29,6 +29,8 @@ echo "Done batchl2bin."
 '''
 
 batchl3bin = '''#!/bin/sh
+export OCSSWROOT={SEADAS_PATH}
+source $OCSSWROOT/OCSSW_bash.env
 cd {directory}
 # NOTE! change these for your own region of interest
 
@@ -60,7 +62,7 @@ inList="list.txt"
 #       BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
 #       BASE1=${{BASE:0:8}}
         BASE1="A{year}${{thisDay}}"
-        L3FILE=${{BASE1}}.L3_LAC_OC
+        L3FILE=${{BASE1}}*.L3_LAC_OC
         L3FILEBinned=${{BASE1}}.L3b_GAC
 
         # process the L2 file to L3
@@ -76,8 +78,10 @@ echo "Done batchl3bin."
 '''
 
 batchl3mapgen = '''#!/bin/bash
+export OCSSWROOT={SEADAS_PATH}
+source $OCSSWROOT/OCSSW_bash.env
 cd {directory}
-# to run: ./batchl3bin.bsh
+# to run: ./batchl3mapgen.bsh
 
 # Update the coordinates!
 
@@ -135,14 +139,16 @@ do
 
 done
 
-# mv *.L3b_GAC.* afterrun/
+mv *.L3b_GAC afterrun/
 mv *1km.hdf OC_maps
 '''
 
 batchSmigen = '''
 #!/bin/bash
+export OCSSWROOT={SEADAS_PATH}
+source $OCSSWROOT/OCSSW_bash.env
 cd {directory}
-# to run: ./batchl3bin.bsh
+# to run: ./batchSmigen.bsh
 # Update the coordinates!
 
 # first define the region to be extracted from your MODIS L1A files
@@ -158,7 +164,7 @@ do
   BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
   # BASE1=${{BASE:0:8}}
   # echo $BASE1
-  L3FILE=${{BASE}}.L3b_GAC.main
+  L3FILE=${{BASE}}.L3b_GAC # .main
   L3FILEMapCHL=${{BASE}}.L3m_DAY_CHL_chlor_a_1km.hdf
   L3FILEMapPIC=${{BASE}}.L3m_DAY_PIC_1km.hdf
   L3FILEMapIPAR=${{BASE}}.L3m_DAY_IPAR_1km.hdf
@@ -173,33 +179,34 @@ do
   latnorth=$NELAT latsouth=$SWLAT \
   projection=RECT resolution=1km precision=F
 
-  echo "Processing $L3FILE to a pic map..."
-  # NOTE! customize the l2gen parameters here
-  smigen ifile=$L3FILE ofile=$L3FILEMapPIC \
-  prod='pic' \
-  loneast=$NELON lonwest=$SWLON \
-  latnorth=$NELAT latsouth=$SWLAT \
-  projection=RECT resolution=1km precision=F
+  # echo "Processing $L3FILE to a pic map..."
+  # # NOTE! customize the l2gen parameters here
+  # smigen ifile=$L3FILE ofile=$L3FILEMapPIC \
+  # prod='pic' \
+  # loneast=$NELON lonwest=$SWLON \
+  # latnorth=$NELAT latsouth=$SWLAT \
+  # projection=RECT resolution=1km precision=F
 
-  echo "Processing $L3FILE to a ipar map..."
-  # NOTE! customize the l2gen parameters here
-  smigen ifile=$L3FILE ofile=$L3FILEMapIPAR \
-  prod='ipar' \
-  loneast=$NELON lonwest=$SWLON \
-  latnorth=$NELAT latsouth=$SWLAT \
-  projection=RECT resolution=1km precision=F
+  # echo "Processing $L3FILE to a ipar map..."
+  # # NOTE! customize the l2gen parameters here
+  # smigen ifile=$L3FILE ofile=$L3FILEMapIPAR \
+  # prod='ipar' \
+  # loneast=$NELON lonwest=$SWLON \
+  # latnorth=$NELAT latsouth=$SWLAT \
+  # projection=RECT resolution=1km precision=F
 
-  echo "Processing $L3FILE to a nflh map..."
-  # NOTE! customize the l2gen parameters here
-  smigen ifile=$L3FILE ofile=$L3FILEMapNFLH \
-  prod='nflh' \
-  loneast=$NELON lonwest=$SWLON \
-  latnorth=$NELAT latsouth=$SWLAT \
-  projection=RECT resolution=1km precision=F
+  # echo "Processing $L3FILE to a nflh map..."
+  # # NOTE! customize the l2gen parameters here
+  # smigen ifile=$L3FILE ofile=$L3FILEMapNFLH \
+  # prod='nflh' \
+  # loneast=$NELON lonwest=$SWLON \
+  # latnorth=$NELAT latsouth=$SWLAT \
+  # projection=RECT resolution=1km precision=F
 
 done
 
-mv *.L3b_GAC.* afterrun/
+mv *.L3b_GAC afterrun/
+mv *.L3_LAC_OC afterrun/
 mkdir OC_maps
 mv *1km.hdf OC_maps
 
