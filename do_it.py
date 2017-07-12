@@ -65,10 +65,10 @@ def create_file(filename):
     st = os.stat(target_file)
     os.chmod(target_file, st.st_mode | stat.S_IEXEC)
 
-    if DOWNLOAD:
-        download_files(start_date, number_of_days, lon, lat, target_directory)
+if DOWNLOAD:
+    download_files(start_date, number_of_days, lon, lat, target_directory)
 
-for filename in ['batchl2bin', 'batchl3bin', 'batchl3mapgen', 'batchSmigen']:
+for filename in ['batchl2bin', 'batchl3bin', 'batchSmigen']:
     create_file(filename)
     cmd = os.path.join(target_directory, './{}.bsh'.format(filename))
     # subprocess.Popen(cmd,
