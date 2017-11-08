@@ -8,23 +8,47 @@ cd {directory}
 
 mkdir afterrun
 
-for FILE in *L2_LAC*
+for FILE in originals/*L2_LAC_OC*
 do
   # The line below assumes an extension, and creates a base name without that extension
   BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
 
   L2FILE=${{BASE}}.L2_LAC_OC.nc
-  L3FILE=${{BASE}}.L3_LAC_OC
+  L3FILE=${{BASE##*/}}.L3_LAC_OC
 
   # process the L2 file to L3
   echo "Processing $L2FILE to Level 3..."
   # NOTE! customize the l2gen parameters here
   l2bin infile=$L2FILE ofile=$L3FILE \
-  resolve=1 flaguse=[''] l3bprod='chlor_a,pic,nflh,ipar'
+  resolve=1 flaguse=[''] l3bprod='chlor_a'
 
 done
 
-mv *.L2_LAC_OC.nc afterrun/
+# for FILE in originals/*L2_LAC_SST*
+# do
+#   # The line below assumes an extension, and creates a base name without that extension
+#   BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
+
+#   L2FILE=${{BASE}}.L2_LAC_SST.nc
+#   L3FILE=${{BASE##*/}}.L3_LAC_SST
+
+#   # process the L2 file to L3
+#   echo "Processing $L2FILE to Level 3..."
+#   # NOTE! customize the l2gen parameters here
+#   l2bin infile=$L2FILE ofile=$L3FILE \
+#   resolve=1 flaguse=[''] l3bprod='sst' night=1
+
+#   L2FILE=${{BASE}}.L2_LAC_SST4.nc
+#   L3FILE=${{BASE##*/}}.L3_LAC_SST4
+
+#   # process the L2 file to L3
+#   echo "Processing $L2FILE to Level 3..."
+#   # NOTE! customize the l2gen parameters here
+#   l2bin infile=$L2FILE ofile=$L3FILE \
+#   resolve=1 flaguse=[''] l3bprod='sst4' night=1
+# done
+
+mv *.L2_LAC_*.nc afterrun/
 echo "Done batchl2bin."
 '''
 
@@ -49,13 +73,24 @@ for DAYINYEAR in {days_in_year}
 do
 thisDay=$DAYINYEAR
 echo "$thisDay"
-rm list.txt
-for FILE in *${{DAYINYEAR}}*L3_LAC*
+rm list*.txt
+for FILE in *${{DAYINYEAR}}*L3_LAC_OC*
 do
-echo $FILE >> list.txt
+echo $FILE >> list_oc.txt
 done
+# for FILE in *${{DAYINYEAR}}*L3_LAC_SST
+# do
+# echo $FILE >> list_sst.txt
+# done
 
-inList="list.txt"
+# for FILE in *${{DAYINYEAR}}*L3_LAC_SST4
+# do
+# echo $FILE >> list_sst4.txt
+# done
+
+inListOC="list_oc.txt"
+# inListSST="list_sst.txt"
+# inListSST4="list_sst4.txt"
 
 
 # The line below assumes an extension, and creates a base name without that extension
@@ -63,15 +98,38 @@ inList="list.txt"
 #       BASE1=${{BASE:0:8}}
         BASE1="A{year}${{thisDay}}"
         L3FILE=${{BASE1}}*.L3_LAC_OC
-        L3FILEBinned=${{BASE1}}.L3b_GAC
+        L3FILEBinned=${{BASE1}}.L3b_GAC_OC
 
         # process the L2 file to L3
         echo "Processing $L3FILE to Level 3 binned..."
         # NOTE! customize the l2gen parameters here "chlor_a,pic,par,nflh"
-        l3bin in=$inList ofile=$L3FILEBinned \
+        l3bin in=$inListOC ofile=$L3FILEBinned \
         out_parm="chlor_a" \
         loneast=$NELON lonwest=$SWLON \
         latnorth=$NELAT latsouth=$SWLAT
+
+        # BASE1="A{year}${{thisDay}}"
+        # L3FILE=${{BASE1}}*.L3_LAC_SST
+        # L3FILEBinned=${{BASE1}}.L3b_GAC_SST
+
+        # # process the L2 file to L3
+        # echo "Processing $L3FILE to Level 3 binned..."
+        # l3bin in=$inListSST ofile=$L3FILEBinned \
+        # out_parm="sst" \
+        # loneast=$NELON lonwest=$SWLON \
+        # latnorth=$NELAT latsouth=$SWLAT
+
+        # BASE1="A{year}${{thisDay}}"
+        # L3FILE=${{BASE1}}*.L3_LAC_SST4
+        # L3FILEBinned=${{BASE1}}.L3b_GAC_SST4
+
+        # # process the L2 file to L3
+        # echo "Processing $L3FILE to Level 3 binned..."
+        # # NOTE! customize the l2gen parameters here "chlor_a,pic,par,nflh"
+        # l3bin in=$inListSST4 ofile=$L3FILEBinned \
+        # out_parm="sst4" \
+        # loneast=$NELON lonwest=$SWLON \
+        # latnorth=$NELAT latsouth=$SWLAT
 
 done
 echo "Done batchl3bin."
@@ -92,55 +150,64 @@ SWLAT={south}
 NELON={east}
 NELAT={north}
 
-for FILE in *L3b_GAC*
+for FILE in *L3b_GAC_OC*
 do
   # The line below assumes an extension, and creates a base name without that extension
   BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
   # BASE1=${{BASE:0:8}}
   # echo $BASE1
-  L3FILE=${{BASE}}.L3b_GAC #.main
-  L3FILEMapCHL=${{BASE}}.L3m_DAY_CHL_chlor_a_1km.hdf
-  L3FILEMapPIC=${{BASE}}.L3m_DAY_PIC_1km.hdf
-  L3FILEMapIPAR=${{BASE}}.L3m_DAY_IPAR_1km.hdf
-  L3FILEMapNFLH=${{BASE}}.L3m_DAY_NFLH_1km.hdf
+  L3FILE=${{BASE}}.L3b_GAC_OC #.main
+  # L3FILEMapCHL=${{BASE}}.L3m_DAY_CHL_chlor_a_1km.nc
+  L3FILEMapOC=${{BASE}}.L3m_DAY_OC_1km.nc
 
   # process the L2 file to L3
   echo "Processing $L3FILE to a chl map..."
   # NOTE! customize the l2gen parameters here
-  l3mapgen ifile=$L3FILE ofile=$L3FILEMapCHL \
+  l3mapgen ifile=$L3FILE ofile=$L3FILEMapOC \
   product='chlor_a' \
   resolution=1km \
   east=$NELON west=$SWLON \
   north=$NELAT south=$SWLAT \
 
-  # echo "Processing $L3FILE to a pic map..."
-  # # NOTE! customize the l2gen parameters here
-  # smigen ifile=$L3FILE ofile=$L3FILEMapPIC \
-  # prod='pic' \
-  # loneast=$NELON lonwest=$SWLON \
-  # latnorth=$NELAT latsouth=$SWLAT \
-  # projection=RECT resolution=1km precision=F
-
-  # echo "Processing $L3FILE to a ipar map..."
-  # # NOTE! customize the l2gen parameters here
-  # smigen ifile=$L3FILE ofile=$L3FILEMapIPAR \
-  # prod='ipar' \
-  # loneast=$NELON lonwest=$SWLON \
-  # latnorth=$NELAT latsouth=$SWLAT \
-  # projection=RECT resolution=1km precision=F
-
-  # echo "Processing $L3FILE to a nflh map..."
-  # # NOTE! customize the l2gen parameters here
-  # smigen ifile=$L3FILE ofile=$L3FILEMapNFLH \
-  # prod='nflh' \
-  # loneast=$NELON lonwest=$SWLON \
-  # latnorth=$NELAT latsouth=$SWLAT \
-  # projection=RECT resolution=1km precision=F
-
 done
 
-mv *.L3b_GAC afterrun/
-mv *1km.hdf OC_maps
+# for FILE in *L3b_GAC_SST
+# do
+#   # The line below assumes an extension, and creates a base name without that extension
+#   BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
+#   # BASE1=${{BASE:0:8}}
+#   # echo $BASE1
+#   L3FILE=${{BASE}}.L3b_GAC_SST #.main
+
+#   L3FILEMapSST=${{BASE}}.L3m_DAY_SST_1km.nc
+#   # process the L2 file to L3
+#   echo "Processing $L3FILE to a chl map..."
+#   # NOTE! customize the l2gen parameters here
+#   l3mapgen ifile=$L3FILE ofile=$L3FILEMapSST \
+#   product='sst' \
+#   resolution=1km \
+#   east=$NELON west=$SWLON \
+#   north=$NELAT south=$SWLAT \
+# done
+
+# for FILE in *L3b_GAC_SST4
+# do
+#   L3FILE=${{BASE}}.L3b_GAC_SST4 #.main
+
+#   L3FILEMapSST=${{BASE}}.L3m_DAY_SST4_1km.nc
+#   # process the L2 file to L3
+#   echo "Processing $L3FILE to a chl map..."
+#   # NOTE! customize the l2gen parameters here
+#   l3mapgen ifile=$L3FILE ofile=$L3FILEMapSST \
+#   product='sst4' \
+#   resolution=1km \
+#   east=$NELON west=$SWLON \
+#   north=$NELAT south=$SWLAT \
+# done
+
+mkdir OC_maps
+mv *.L3b_GAC* afterrun/
+mv *1km.nc OC_maps
 '''
 
 batchSmigen = '''
@@ -158,17 +225,14 @@ SWLAT={south}
 NELON={east}
 NELAT={north}
 
-for FILE in *L3b_GAC*
+for FILE in *L3b_GAC_OC*
 do
   # The line below assumes an extension, and creates a base name without that extension
-  BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
-  # BASE1=${{BASE:0:8}}
-  # echo $BASE1
-  L3FILE=${{BASE}}.L3b_GAC # .main
-  L3FILEMapCHL=${{BASE}}.L3m_DAY_CHL_chlor_a_1km.hdf
-  L3FILEMapPIC=${{BASE}}.L3m_DAY_PIC_1km.hdf
-  L3FILEMapIPAR=${{BASE}}.L3m_DAY_IPAR_1km.hdf
-  L3FILEMapNFLH=${{BASE}}.L3m_DAY_NFLH_1km.hdf
+  L3FILE=${{BASE}}.L3b_GAC_OC # .main
+  L3FILEMapCHL=${{BASE}}.L3m_DAY_CHL_chlor_a_1km.nc
+  L3FILEMapPIC=${{BASE}}.L3m_DAY_PIC_1km.nc
+  L3FILEMapIPAR=${{BASE}}.L3m_DAY_IPAR_1km.nc
+  L3FILEMapNFLH=${{BASE}}.L3m_DAY_NFLH_1km.nc
 
   # process the L2 file to L3
   echo "Processing $L3FILE to a chl map..."
@@ -178,37 +242,27 @@ do
   loneast=$NELON lonwest=$SWLON \
   latnorth=$NELAT latsouth=$SWLAT \
   projection=RECT resolution=1km precision=F
-
-  # echo "Processing $L3FILE to a pic map..."
-  # # NOTE! customize the l2gen parameters here
-  # smigen ifile=$L3FILE ofile=$L3FILEMapPIC \
-  # prod='pic' \
-  # loneast=$NELON lonwest=$SWLON \
-  # latnorth=$NELAT latsouth=$SWLAT \
-  # projection=RECT resolution=1km precision=F
-
-  # echo "Processing $L3FILE to a ipar map..."
-  # # NOTE! customize the l2gen parameters here
-  # smigen ifile=$L3FILE ofile=$L3FILEMapIPAR \
-  # prod='ipar' \
-  # loneast=$NELON lonwest=$SWLON \
-  # latnorth=$NELAT latsouth=$SWLAT \
-  # projection=RECT resolution=1km precision=F
-
-  # echo "Processing $L3FILE to a nflh map..."
-  # # NOTE! customize the l2gen parameters here
-  # smigen ifile=$L3FILE ofile=$L3FILEMapNFLH \
-  # prod='nflh' \
-  # loneast=$NELON lonwest=$SWLON \
-  # latnorth=$NELAT latsouth=$SWLAT \
-  # projection=RECT resolution=1km precision=F
-
 done
 
-mv *.L3b_GAC afterrun/
-mv *.L3_LAC_OC afterrun/
+for FILE in *L3b_GAC_SST*
+do
+  BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
+  L3FILE=${{BASE}}.L3b_GAC_SST # .main
+  L3FILEMapSST=${{BASE}}.L3m_DAY_SST_1km.nc
+
+  echo "Processing $L3FILE to a SST map..."
+  # NOTE! customize the l2gen parameters here
+  smigen ifile=$L3FILE ofile=$L3FILEMapSST \
+  prod='sst' \
+  loneast=$NELON lonwest=$SWLON \
+  latnorth=$NELAT latsouth=$SWLAT \
+  projection=RECT resolution=1km precision=F
+done
+
+mv *.L3b_GAC_* afterrun/
+mv *.L3_LAC_* afterrun/
 mkdir OC_maps
-mv *1km.hdf OC_maps
+mv *1km.nc OC_maps
 
 echo "Done batchSmigen"
 '''
