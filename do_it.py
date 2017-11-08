@@ -20,6 +20,9 @@ lon = (30, 36)
 lat = (30, 38)
 
 target_directory = os.path.join(HOME_DIRECTORY,BASE_DIRECTORY, target_directory, '')
+if not os.path.exists(target_directory):
+    os.makedirs(target_directory)
+
 SEADAS_PATH = os.path.join(HOME_DIRECTORY, SEADAS_PATH)
 print('Files will be saved at: {}'.format(target_directory))
 number_of_days = (end_date - start_date).days
@@ -68,13 +71,9 @@ def create_file(filename):
 if DOWNLOAD:
     download_files(start_date, number_of_days, lon, lat, target_directory)
 
-for filename in ['batchl2bin', 'batchl3bin', 'batchSmigen']:
+for filename in ['batchl2bin', 'batchl3bin', 'batchl3mapgen']:
     create_file(filename)
     cmd = os.path.join(target_directory, './{}.bsh'.format(filename))
-    # subprocess.Popen(cmd,
-    #                  shell=True,
-    #                  stdout=subprocess.PIPE,
-    #                  stderr=subprocess.PIPE)
     subprocess.call(cmd, shell=True)
 
 if CONVERT_TO_NetCDF4:
