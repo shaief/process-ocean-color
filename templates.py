@@ -24,30 +24,6 @@ do
 
 done
 
-# for FILE in originals/*L2_LAC_SST*
-# do
-#   # The line below assumes an extension, and creates a base name without that extension
-#   BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
-
-#   L2FILE=${{BASE}}.L2_LAC_SST.nc
-#   L3FILE=${{BASE##*/}}.L3_LAC_SST
-
-#   # process the L2 file to L3
-#   echo "Processing $L2FILE to Level 3..."
-#   # NOTE! customize the l2gen parameters here
-#   l2bin infile=$L2FILE ofile=$L3FILE \
-#   resolve=1 flaguse=[''] l3bprod='sst' night=1
-
-#   L2FILE=${{BASE}}.L2_LAC_SST4.nc
-#   L3FILE=${{BASE##*/}}.L3_LAC_SST4
-
-#   # process the L2 file to L3
-#   echo "Processing $L2FILE to Level 3..."
-#   # NOTE! customize the l2gen parameters here
-#   l2bin infile=$L2FILE ofile=$L3FILE \
-#   resolve=1 flaguse=[''] l3bprod='sst4' night=1
-# done
-
 mv *.L2_LAC_*.nc afterrun/
 echo "Done batchl2bin."
 '''
@@ -78,24 +54,11 @@ for FILE in *${{DAYINYEAR}}*L3_LAC_OC*
 do
 echo $FILE >> list_oc.txt
 done
-# for FILE in *${{DAYINYEAR}}*L3_LAC_SST
-# do
-# echo $FILE >> list_sst.txt
-# done
-
-# for FILE in *${{DAYINYEAR}}*L3_LAC_SST4
-# do
-# echo $FILE >> list_sst4.txt
-# done
 
 inListOC="list_oc.txt"
-# inListSST="list_sst.txt"
-# inListSST4="list_sst4.txt"
 
 
 # The line below assumes an extension, and creates a base name without that extension
-#       BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
-#       BASE1=${{BASE:0:8}}
         BASE1="A{year}${{thisDay}}"
         L3FILE=${{BASE1}}*.L3_LAC_OC
         L3FILEBinned=${{BASE1}}.L3b_GAC_OC
@@ -107,29 +70,6 @@ inListOC="list_oc.txt"
         out_parm="chlor_a" \
         loneast=$NELON lonwest=$SWLON \
         latnorth=$NELAT latsouth=$SWLAT
-
-        # BASE1="A{year}${{thisDay}}"
-        # L3FILE=${{BASE1}}*.L3_LAC_SST
-        # L3FILEBinned=${{BASE1}}.L3b_GAC_SST
-
-        # # process the L2 file to L3
-        # echo "Processing $L3FILE to Level 3 binned..."
-        # l3bin in=$inListSST ofile=$L3FILEBinned \
-        # out_parm="sst" \
-        # loneast=$NELON lonwest=$SWLON \
-        # latnorth=$NELAT latsouth=$SWLAT
-
-        # BASE1="A{year}${{thisDay}}"
-        # L3FILE=${{BASE1}}*.L3_LAC_SST4
-        # L3FILEBinned=${{BASE1}}.L3b_GAC_SST4
-
-        # # process the L2 file to L3
-        # echo "Processing $L3FILE to Level 3 binned..."
-        # # NOTE! customize the l2gen parameters here "chlor_a,pic,par,nflh"
-        # l3bin in=$inListSST4 ofile=$L3FILEBinned \
-        # out_parm="sst4" \
-        # loneast=$NELON lonwest=$SWLON \
-        # latnorth=$NELAT latsouth=$SWLAT
 
 done
 echo "Done batchl3bin."
@@ -171,40 +111,6 @@ do
 
 done
 
-# for FILE in *L3b_GAC_SST
-# do
-#   # The line below assumes an extension, and creates a base name without that extension
-#   BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
-#   # BASE1=${{BASE:0:8}}
-#   # echo $BASE1
-#   L3FILE=${{BASE}}.L3b_GAC_SST #.main
-
-#   L3FILEMapSST=${{BASE}}.L3m_DAY_SST_1km.nc
-#   # process the L2 file to L3
-#   echo "Processing $L3FILE to a chl map..."
-#   # NOTE! customize the l2gen parameters here
-#   l3mapgen ifile=$L3FILE ofile=$L3FILEMapSST \
-#   product='sst' \
-#   resolution=1km \
-#   east=$NELON west=$SWLON \
-#   north=$NELAT south=$SWLAT \
-# done
-
-# for FILE in *L3b_GAC_SST4
-# do
-#   L3FILE=${{BASE}}.L3b_GAC_SST4 #.main
-
-#   L3FILEMapSST=${{BASE}}.L3m_DAY_SST4_1km.nc
-#   # process the L2 file to L3
-#   echo "Processing $L3FILE to a chl map..."
-#   # NOTE! customize the l2gen parameters here
-#   l3mapgen ifile=$L3FILE ofile=$L3FILEMapSST \
-#   product='sst4' \
-#   resolution=1km \
-#   east=$NELON west=$SWLON \
-#   north=$NELAT south=$SWLAT \
-# done
-
 mkdir OC_maps
 mv *.L3b_GAC* afterrun/
 mv *1km.nc OC_maps
@@ -239,21 +145,6 @@ do
   # NOTE! customize the l2gen parameters here
   smigen ifile=$L3FILE ofile=$L3FILEMapCHL \
   prod='chlor_a' \
-  loneast=$NELON lonwest=$SWLON \
-  latnorth=$NELAT latsouth=$SWLAT \
-  projection=RECT resolution=1km precision=F
-done
-
-for FILE in *L3b_GAC_SST*
-do
-  BASE=`echo $FILE |awk -F. '{{ print $1 }}'`
-  L3FILE=${{BASE}}.L3b_GAC_SST # .main
-  L3FILEMapSST=${{BASE}}.L3m_DAY_SST_1km.nc
-
-  echo "Processing $L3FILE to a SST map..."
-  # NOTE! customize the l2gen parameters here
-  smigen ifile=$L3FILE ofile=$L3FILEMapSST \
-  prod='sst' \
   loneast=$NELON lonwest=$SWLON \
   latnorth=$NELAT latsouth=$SWLAT \
   projection=RECT resolution=1km precision=F
