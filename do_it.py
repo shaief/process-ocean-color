@@ -14,12 +14,16 @@ target_directory = 'project_directory'
 
 DOWNLOAD = True
 CONVERT_TO_NetCDF4 = False  # True
+CREATE_PNGS = True
+
 start_date = date(2016, 5, 1)
 end_date = date(2016, 5, 10)
 lon = (30, 36)
 lat = (30, 38)
 
-target_directory = os.path.join(HOME_DIRECTORY,BASE_DIRECTORY, target_directory, '')
+target_directory = os.path.join(HOME_DIRECTORY, BASE_DIRECTORY,
+                                target_directory, f'{start_date.year}',
+                                f'{start_date.month}', '')
 if not os.path.exists(target_directory):
     os.makedirs(target_directory)
 
@@ -68,6 +72,7 @@ def create_file(filename):
     st = os.stat(target_file)
     os.chmod(target_file, st.st_mode | stat.S_IEXEC)
 
+
 if DOWNLOAD:
     download_files(start_date, number_of_days, lon, lat, target_directory)
 
@@ -78,6 +83,7 @@ for filename in ['batchl2bin', 'batchl3bin', 'batchl3mapgen']:
 
 if CONVERT_TO_NetCDF4:
     from hdf5_to_netcdf import convert_hdf5_to_netcdf4
+    cwd = os.getcwd()
     os.chdir('{}/OC_maps'.format(target_directory))
     for filename in glob.glob("*.hdf"):
         print(filename)
@@ -86,4 +92,8 @@ if CONVERT_TO_NetCDF4:
         netcdf_file = filename + '.nc'
         convert_hdf5_to_netcdf4(hdf_file, netcdf_file)
 
-    os.chdir('../../')
+    os.chdir(cwd)
+
+if CREATE_PNGS:
+    from generate_pngs_from_ncs import create_pngs
+    create_pngs(target_directory)
