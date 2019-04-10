@@ -78,8 +78,9 @@ if DOWNLOAD:
 
 for filename in ['batchl2bin', 'batchl3bin', 'batchl3mapgen']:
     create_file(filename)
-    cmd = os.path.join(target_directory, './{}.bsh'.format(filename))
-    subprocess.call(cmd, shell=True)
+    cmd = ['bash', os.path.join(target_directory, f'{filename}.bsh')]
+    print(cmd)
+    subprocess.run(cmd)
 
 if CONVERT_TO_NetCDF4:
     from hdf5_to_netcdf import convert_hdf5_to_netcdf4
